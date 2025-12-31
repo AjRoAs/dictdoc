@@ -1,0 +1,4 @@
+// Backup del build.rs original antes de bindgen
+fn main() {
+    tauri_build::build();
+}

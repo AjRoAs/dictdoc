@@ -1,5 +1,6 @@
 pub mod vosk;
 pub mod whisper;
+pub mod model_downloader;
 
 pub trait SttEngine {
     fn start(&mut self) -> Result<(), String>;

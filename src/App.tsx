@@ -5,6 +5,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { Layout } from "./components/Layout";
 import { ClipboardManager } from "./components/ClipboardManager";
 import { Controls } from "./components/Controls";
+import { Settings } from "./components/Settings";
 import { Editor } from "./components/Editor";
 import { AudioMeter } from "./components/AudioMeter";
 import { TitleBar } from "./components/TitleBar";
@@ -12,12 +13,14 @@ import { SaveRegular, CopyRegular } from "@fluentui/react-icons";
 import { Button } from "@fluentui/react-components";
 
 function App() {
-  const [text, setText] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
-  const [engine, setEngine] = useState<'vosk' | 'whisper'>('vosk');
-  const [language, setLanguage] = useState<'en' | 'es'>('en');
-  const [volume, setVolume] = useState(0);
-  const [history, setHistory] = useState<string[]>([]);
+    const [text, setText] = useState("");
+    const [isRecording, setIsRecording] = useState(false);
+    const [engine, setEngine] = useState<'vosk' | 'whisper'>('vosk');
+    const [language, setLanguage] = useState<'en' | 'es'>('en');
+    const [volume, setVolume] = useState(0);
+    const [history, setHistory] = useState<string[]>([]);
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [autoDownload, setAutoDownload] = useState(true);
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -123,15 +126,16 @@ function App() {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-              <Controls
-                isRecording={isRecording}
-                onStart={handleStart}
-                onStop={handleStop}
-                engine={engine}
-                setEngine={setEngine}
-                language={language}
-                setLanguage={setLanguage}
-              />
+                    <Controls
+                        isRecording={isRecording}
+                        onStart={handleStart}
+                        onStop={handleStop}
+                        engine={engine}
+                        setEngine={setEngine}
+                        language={language}
+                        setLanguage={setLanguage}
+                        onSettings={() => setSettingsOpen(true)}
+                    />
           </div>
 
           <div style={{ marginBottom: '20px' }}>
@@ -165,14 +169,24 @@ function App() {
       </div>
   );
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <TitleBar />
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <Layout sidebar={sidebar} main={main} />
-      </div>
-    </div>
-  );
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <TitleBar />
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+                <Layout sidebar={sidebar} main={main} />
+            </div>
+            <Settings
+                open={settingsOpen}
+                onClose={() => setSettingsOpen(false)}
+                engine={engine}
+                setEngine={setEngine}
+                language={language}
+                setLanguage={setLanguage}
+                autoDownload={autoDownload}
+                setAutoDownload={setAutoDownload}
+            />
+        </div>
+    );
 }
 
 export default App;

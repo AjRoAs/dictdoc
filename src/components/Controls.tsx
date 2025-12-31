@@ -20,6 +20,7 @@ interface ControlsProps {
     setEngine: (engine: 'vosk' | 'whisper') => void;
     language: 'en' | 'es';
     setLanguage: (lang: 'en' | 'es') => void;
+    onSettings?: () => void;
 }
 
 const useStyles = makeStyles({
@@ -65,7 +66,8 @@ export const Controls: React.FC<ControlsProps> = ({
     engine,
     setEngine,
     language,
-    setLanguage
+    setLanguage,
+    onSettings
 }) => {
     const styles = useStyles();
 
@@ -103,6 +105,7 @@ export const Controls: React.FC<ControlsProps> = ({
                     appearance="subtle"
                     icon={<SettingsRegular />}
                     title="Settings"
+                    onClick={onSettings}
                 />
             </div>
         </div>

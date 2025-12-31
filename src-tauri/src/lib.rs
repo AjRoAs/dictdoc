@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex};
 use tauri::{State, Manager, Emitter};
 use audio::AudioInput;
 use stt::{SttEngine, vosk::VoskEngine, whisper::WhisperEngine};
+use stt::model_downloader::{ensure_vosk_model, ensure_whisper_model};
 use device::{DeviceManager, DeviceEvent};
 use text::TextProcessor;
 
@@ -32,6 +33,13 @@ fn start_recording(app: tauri::AppHandle, state: State<AppState>, engine_name: S
             .map_err(|e| format!("Failed to resolve path for {}: {}", model_path_str, e))?;
 
         let model_path_lossy = model_path.to_string_lossy().to_string();
+
+        // Autodescarga de modelos si no existen
+        if engine_name == "vosk" {
+            ensure_vosk_model(&model_path_lossy)?;
+        } else {
+            ensure_whisper_model(&model_path_lossy)?;
+        }
 
         let engine: Box<dyn SttEngine + Send + Sync> = if engine_name == "vosk" {
              match VoskEngine::new(&model_path_lossy, 16000.0) {
