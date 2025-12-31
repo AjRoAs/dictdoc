@@ -1,5 +1,16 @@
 import React from 'react';
-import { Mic, Square, Settings } from 'lucide-react';
+import {
+    Button,
+    Dropdown,
+    Option,
+    makeStyles,
+    tokens
+} from '@fluentui/react-components';
+import {
+    MicRegular,
+    StopRegular,
+    SettingsRegular
+} from '@fluentui/react-icons';
 
 interface ControlsProps {
     isRecording: boolean;
@@ -11,6 +22,42 @@ interface ControlsProps {
     setLanguage: (lang: 'en' | 'es') => void;
 }
 
+const useStyles = makeStyles({
+    container: {
+        display: 'flex',
+        gap: '10px',
+        alignItems: 'center',
+        padding: '10px',
+        background: tokens.colorNeutralBackground2,
+        borderRadius: tokens.borderRadiusMedium,
+        border: `1px solid ${tokens.colorNeutralStroke1}`
+    },
+    recordBtn: {
+        minWidth: '50px',
+        height: '50px',
+        borderRadius: '50%',
+        '&.recording': {
+             backgroundColor: tokens.colorPaletteRedBackground3,
+             color: tokens.colorNeutralForegroundOnBrand,
+             ':hover': {
+                 backgroundColor: tokens.colorPaletteRedBackground2,
+             }
+        },
+        '&.idle': {
+            backgroundColor: tokens.colorPaletteGreenBackground3,
+             color: tokens.colorNeutralForegroundOnBrand,
+             ':hover': {
+                 backgroundColor: tokens.colorPaletteGreenBackground2,
+             }
+        }
+    },
+    selectContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '5px'
+    }
+});
+
 export const Controls: React.FC<ControlsProps> = ({
     isRecording,
     onStart,
@@ -20,40 +67,43 @@ export const Controls: React.FC<ControlsProps> = ({
     language,
     setLanguage
 }) => {
+    const styles = useStyles();
+
     return (
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', padding: '10px', background: '#f5f5f5', borderRadius: '8px' }}>
-            <button
+        <div className={styles.container}>
+            <Button
                 onClick={isRecording ? onStop : onStart}
-                style={{
-                    backgroundColor: isRecording ? '#ff4444' : '#4caf50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '50px',
-                    height: '50px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer'
-                }}
-            >
-                {isRecording ? <Square size={24} /> : <Mic size={24} />}
-            </button>
+                className={`${styles.recordBtn} ${isRecording ? 'recording' : 'idle'}`}
+                icon={isRecording ? <StopRegular fontSize={24} /> : <MicRegular fontSize={24} />}
+                shape="circular"
+            />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <select value={engine} onChange={(e) => setEngine(e.target.value as any)} style={{ padding: '5px' }}>
-                    <option value="vosk">Vosk (Fast/Offline)</option>
-                    <option value="whisper">Whisper (High Accuracy)</option>
-                </select>
+            <div className={styles.selectContainer}>
+                <Dropdown
+                    value={engine === 'vosk' ? "Vosk (Fast/Offline)" : "Whisper (High Accuracy)"}
+                    selectedOptions={[engine]}
+                    onOptionSelect={(_, data) => setEngine(data.optionValue as any)}
+                >
+                    <Option value="vosk">Vosk (Fast/Offline)</Option>
+                    <Option value="whisper">Whisper (High Accuracy)</Option>
+                </Dropdown>
 
-                <select value={language} onChange={(e) => setLanguage(e.target.value as any)} style={{ padding: '5px' }}>
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                </select>
+                <Dropdown
+                    value={language === 'en' ? "English" : "Spanish"}
+                    selectedOptions={[language]}
+                    onOptionSelect={(_, data) => setLanguage(data.optionValue as any)}
+                >
+                    <Option value="en">English</Option>
+                    <Option value="es">Spanish</Option>
+                </Dropdown>
             </div>
 
             <div style={{ marginLeft: 'auto' }}>
-                <Settings size={20} color="#666" style={{ cursor: 'pointer' }} />
+                <Button
+                    appearance="subtle"
+                    icon={<SettingsRegular />}
+                    title="Settings"
+                />
             </div>
         </div>
     );
