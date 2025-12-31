@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { Layout } from "./components/Layout";
 import { ClipboardManager } from "./components/ClipboardManager";
 import { Controls } from "./components/Controls";
 import { Editor } from "./components/Editor";
 import { AudioMeter } from "./components/AudioMeter";
-import { Save, Copy } from "lucide-react";
+import { TitleBar } from "./components/TitleBar";
+import { SaveRegular, CopyRegular } from "@fluentui/react-icons";
+import { Button } from "@fluentui/react-components";
 
 function App() {
   const [text, setText] = useState("");
@@ -87,7 +90,7 @@ function App() {
 
   const handleCopy = async (textToCopy: string) => {
       try {
-          await navigator.clipboard.writeText(textToCopy);
+          await writeText(textToCopy);
           // Optional: Show toast notification
       } catch (e) {
           console.error("Failed to copy", e);
@@ -143,27 +146,32 @@ function App() {
                   marginTop: '10px',
                   justifyContent: 'flex-end'
               }}>
-                  <button
+                  <Button
                       onClick={() => addToHistory(text)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-                      title="Save to History"
+                      icon={<SaveRegular />}
+                      appearance="subtle"
                   >
-                      <Save size={16} /> Save to History
-                  </button>
-                  <button
+                      Save to History
+                  </Button>
+                  <Button
                       onClick={() => handleCopy(text)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-                      title="Copy to Clipboard"
+                      icon={<CopyRegular />}
+                      appearance="subtle"
                   >
-                      <Copy size={16} /> Copy All
-                  </button>
+                      Copy All
+                  </Button>
               </div>
           </div>
       </div>
   );
 
   return (
-    <Layout sidebar={sidebar} main={main} />
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <TitleBar />
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <Layout sidebar={sidebar} main={main} />
+      </div>
+    </div>
   );
 }
 

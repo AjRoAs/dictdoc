@@ -22,21 +22,26 @@ fn start_recording(app: tauri::AppHandle, state: State<AppState>, engine_name: S
     {
         let mut current_engine = state.current_engine.lock().map_err(|_| "Failed to lock engine")?;
 
-        let model_path = if engine_name == "vosk" {
+        let model_path_str = if engine_name == "vosk" {
             "models/vosk-model-en-us-0.22"
         } else {
             "models/ggml-base.en.bin"
         };
 
+        let model_path = app.path().resolve(model_path_str, tauri::path::BaseDirectory::Resource)
+            .map_err(|e| format!("Failed to resolve path for {}: {}", model_path_str, e))?;
+
+        let model_path_lossy = model_path.to_string_lossy().to_string();
+
         let engine: Box<dyn SttEngine + Send + Sync> = if engine_name == "vosk" {
-             match VoskEngine::new(model_path, 16000.0) {
+             match VoskEngine::new(&model_path_lossy, 16000.0) {
                  Ok(e) => Box::new(e),
-                 Err(_) => return Err(format!("Vosk model not found at {}", model_path))
+                 Err(e) => return Err(format!("Vosk init failed at {}: {}", model_path_lossy, e))
              }
         } else {
-             match WhisperEngine::new(model_path) {
+             match WhisperEngine::new(&model_path_lossy) {
                  Ok(e) => Box::new(e),
-                 Err(_) => return Err(format!("Whisper model not found at {}", model_path))
+                 Err(e) => return Err(format!("Whisper init failed at {}: {}", model_path_lossy, e))
              }
         };
 
@@ -102,6 +107,7 @@ pub fn run() {
     }
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
             app.manage(AppState {
                 audio_input: Arc::new(Mutex::new(AudioInput::new())),
